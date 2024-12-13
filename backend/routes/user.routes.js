@@ -10,7 +10,7 @@ const { authUser } = require("../middlewares/auth.middleware");
 const {
   validateRegister,
   validateLogin,
-} = require("../middlewares/validation.middleware");
+} = require("../middlewares/userValidation.middleware");
 
 router.post("/register", validateRegister, registerUser);
 

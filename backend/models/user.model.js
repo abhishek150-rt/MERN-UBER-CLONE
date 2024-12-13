@@ -2,7 +2,7 @@ const { Schema, model } = require("mongoose");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-const UserSchema = new Schema({
+const userSchema = new Schema({
   fullName: {
     firstName: {
       type: String,
@@ -13,37 +13,39 @@ const UserSchema = new Schema({
       type: String,
     },
   },
-  
+
   email: {
     type: String,
     required: true,
     unique: true,
+    lowercase: true,
   },
   password: {
     type: String,
     required: true,
     select: false,
   },
+
   socketId: {
     type: String,
   },
 });
 
-UserSchema.methods.generateToken = function () {
+userSchema.methods.generateToken = function () {
   const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET, {
     expiresIn: "24h",
   });
   return token;
 };
 
-UserSchema.methods.comparePassword = async function (password) {
+userSchema.methods.comparePassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
-UserSchema.statics.hashPassword = async function (password) {
+userSchema.statics.hashPassword = async function (password) {
   return await bcrypt.hash(password, 10);
 };
 
-const userModel = model("user", UserSchema);
+const userModel = model("user", userSchema);
 
 module.exports = { userModel };

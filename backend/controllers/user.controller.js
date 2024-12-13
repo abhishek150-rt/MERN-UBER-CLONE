@@ -5,7 +5,7 @@ const userService = require("../services/user.service");
 
 // Register User
 const registerUser = async (req, res) => {
-  handleValidationErrors(req, res);
+  if (handleValidationErrors(req, res)) return;
 
   const {
     fullName: { firstName, lastName },
@@ -14,7 +14,11 @@ const registerUser = async (req, res) => {
   } = req.body;
 
   try {
-    // Hash password and create user
+    const userAlreadyExist = await userModel.findOne({ email });
+    if (userAlreadyExist) {
+      return res.status(400).json({ message: "User already exist" });
+    }
+
     const hashedPassword = await userModel.hashPassword(password);
     const user = await userService.createUser({
       firstName,
@@ -27,7 +31,9 @@ const registerUser = async (req, res) => {
     return res.status(201).json({ user, token });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: error.message || "Error registering user." });
+    return res
+      .status(500)
+      .json({ message: error.message || "Error registering user." });
   }
 };
 
@@ -38,7 +44,7 @@ const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await userModel.findOne({ email }).select("+password");
+    const user = await userModel.findOne({ email }).select("fullName");
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password." });
     }
@@ -53,7 +59,9 @@ const loginUser = async (req, res) => {
     return res.status(200).json({ token, user });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: error.message || "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ message: error.message || "Internal Server Error" });
   }
 };
 
@@ -66,25 +74,26 @@ const getUserProfile = async (req, res) => {
     return res.status(200).json({ data: req.user, status: "success" });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: error.message || "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ message: error.message || "Internal Server Error" });
   }
 };
 
 // Logout User
 const logoutUser = async (req, res) => {
   try {
-    // Get the token from cookie or authorization header
     const token = req.cookies.token || req.headers.authorization.split(" ")[1];
 
-    // Blacklist token
     await blacklistTokenModel.create({ token });
 
-    // Clear the token cookie
     res.clearCookie("token");
     return res.status(200).json({ message: "Logout Successful" });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: error.message || "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ message: error.message || "Internal Server Error" });
   }
 };
 
