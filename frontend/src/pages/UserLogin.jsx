@@ -1,20 +1,45 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "../assets/logo2.png";
+import { UserDataContext } from "../context/UserContext";
 const UserLogin = () => {
+  const navigate = useNavigate();
+  const { user, setUser } = useContext(UserDataContext);
+ 
   const [formValue, setFormValues] = useState({
     email: "",
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("formValues",formValue)
+
+    try {
+      const response = await fetch("http://localhost:3001/api/user/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formValue),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response}`);
+      }
+
+      const data = await response.json();
+
+      if (data && data.token && data.user) {
+        localStorage.setItem("token",data.token)
+        navigate("/home");
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <div className="p-7 h-screen flex flex-col justify-between">
-      <div >
-      <img src={Logo} alt="LOGO" className="w-20 mb-5" />
+      <div>
+        <img src={Logo} alt="LOGO" className="w-20 mb-5" />
         <form onSubmit={handleSubmit}>
           <h3 className="text-base font-medium mb-2">What's Your email</h3>
           <input
@@ -57,9 +82,7 @@ const UserLogin = () => {
       </div>
       <div>
         <button className="bg-[#378a3b] text-white font-semibold mb-7 rounded px-4 py-2 border w-full text-lg placeholder:text-sm">
-          <Link to="/captainLogin">
-          Sign in as captain
-          </Link>
+          <Link to="/captainLogin">Sign in as captain</Link>
         </button>
       </div>
     </div>

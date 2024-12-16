@@ -13,7 +13,7 @@ const validateRegister = [
 ];
 
 const validateLogin = [
-  body("email").isEmail().withMessage("Invalid Email"),
+  body("email").isEmail().withMessage("Invalid Email address"),
   body("password")
     .isLength({ min: 8 })
     .withMessage("Password should be at least 8 characters long"),

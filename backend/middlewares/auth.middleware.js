@@ -4,6 +4,7 @@ const verifyToken = require("../services/token.service");
 
 // Middleware to authenticate the User
 const authUser = async (req, res, next) => {
+  console.log("hola")
   try {
     const token = req.cookies.token || req.headers.authorization.split(" ")[1];
 

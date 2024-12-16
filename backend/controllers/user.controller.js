@@ -39,12 +39,12 @@ const registerUser = async (req, res) => {
 
 // Login User
 const loginUser = async (req, res) => {
-  handleValidationErrors(req, res);
+  if (handleValidationErrors(req, res)) return;
 
   const { email, password } = req.body;
 
   try {
-    const user = await userModel.findOne({ email }).select("fullName");
+    const user = await userModel.findOne({ email }).select("+password");
     if (!user) {
       return res.status(401).json({ message: "Invalid email or password." });
     }
@@ -82,6 +82,7 @@ const getUserProfile = async (req, res) => {
 
 // Logout User
 const logoutUser = async (req, res) => {
+  console.log("reeeee",req)
   try {
     const token = req.cookies.token || req.headers.authorization.split(" ")[1];
 

@@ -1,15 +1,40 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { CaptainDataContext } from "../context/CaptainContext";
 const CaptainLogin = () => {
+  const navigate = useNavigate();
+  const { captain, setCaptain } = useContext(CaptainDataContext);
+  console.log("captain", captain);
+
   const [captainLoginData, setCaptainLoginData] = useState({
     email: "",
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("formValues", captainLoginData);
+    try {
+      const response = await fetch("http://localhost:3001/api/captain/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(captainLoginData),
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response}`);
+      }
+
+      const data = await response.json();
+
+      if (data && data.token && data.captain) {
+        localStorage.setItem("token", data.token);
+        navigate("/captainHome");
+        setCaptain(data.captain);
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <div className="p-7 h-screen flex flex-col justify-between">

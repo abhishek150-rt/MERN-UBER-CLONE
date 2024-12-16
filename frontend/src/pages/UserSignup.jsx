@@ -1,7 +1,11 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "../assets/logo2.png";
+import { UserDataContext } from "../context/UserContext";
 const UserSignup = () => {
+  const navigate = useNavigate();
+  const { user, setUser } = useContext(UserDataContext);
+  console.log("user", setUser);
   const [formValue, setFormValues] = useState({
     firstName: "",
     lastName: "",
@@ -9,9 +13,10 @@ const UserSignup = () => {
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("formValues", formValue);
+
+    // Create payload
     const payload = {
       fullName: {
         firstName: formValue.firstName,
@@ -20,7 +25,33 @@ const UserSignup = () => {
       email: formValue.email,
       password: formValue.password,
     };
+
+    try {
+      // Send POST request with proper headers
+      const response = await fetch("http://localhost:3001/api/user/register", {
+        method: "POST", // Use uppercase for HTTP method
+        headers: {
+          "Content-Type": "application/json", // Set content type to JSON
+        },
+        body: JSON.stringify(payload), // Convert object to JSON
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      if (data && data.user) {
+        alert("User Registration successfull.")
+        setUser(data.user);
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      // Handle error (e.g., show error message to user)
+    }
   };
+
   return (
     <div className="p-7 h-screen flex flex-col justify-between">
       <div>
