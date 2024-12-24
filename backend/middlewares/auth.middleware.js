@@ -4,8 +4,8 @@ const verifyToken = require("../services/token.service");
 
 // Middleware to authenticate the User
 const authUser = async (req, res, next) => {
-  console.log("hola")
   try {
+    
     const token = req.cookies.token || req.headers.authorization.split(" ")[1];
 
     const decoded = await verifyToken(token);
@@ -32,7 +32,7 @@ const authCaptain = async (req, res, next) => {
     const decoded = await verifyToken(token);
 
     const captain = await captainModel.findById(decoded._id);
-   
+
     if (!captain) return res.status(401).json({ message: "Captain not found" });
 
     req.captain = captain; // Attach the captain to the request object

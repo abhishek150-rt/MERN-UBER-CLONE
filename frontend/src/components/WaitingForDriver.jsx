@@ -6,7 +6,7 @@ import {
 } from "@remixicon/react";
 import React from "react";
 
-const WaitingForDriver = ({setWaitingForDriver}) => {
+const WaitingForDriver = ({ setWaitingForDriver, driverDetails }) => {
   return (
     <>
       <div>
@@ -27,9 +27,19 @@ const WaitingForDriver = ({setWaitingForDriver}) => {
             }
           />
           <div>
-            <h2 className="text-lg font-medium">Munna Yadav</h2>
-            <h4 className="text-xl font-semibold -mt-2 -mb-1">UK07 1229</h4>
+            <h2 className="text-lg font-medium">
+              {driverDetails?.captain?.fullName?.firstName}
+              &nbsp;
+              {driverDetails?.captain?.fullName?.lastName}
+            </h2>
+            <h4 className="text-xl font-semibold -mt-2 -mb-1">
+              {driverDetails?.captain?.vehicle?.plate}
+            </h4>
             <p className="text-sm text-gray-600 ">Maruti Suzuki Alto</p>
+            <p className="text-md text-red-600 font-semibold">
+              {driverDetails?.otp && <span>OTP :</span>}
+              {driverDetails?.otp}
+            </p>
           </div>
         </div>
 
@@ -38,25 +48,29 @@ const WaitingForDriver = ({setWaitingForDriver}) => {
             <div className="flex items-center gap-5 p-3 border-b-2">
               <RiMapPin4Fill className="text-lg" />
               <div>
-                <h3 className="text-md font-medium">NKC Projects Pvt Ltd</h3>
-                <p className="text-sm text-gray-400 font-medium">
+                <h3 className="text-md font-medium">{driverDetails?.pickup}</h3>
+                {/* <p className="text-sm text-gray-400 font-medium">
                   Udhoy Vihar phase-5 , Gurugram
-                </p>
+                </p> */}
               </div>
             </div>
             <div className="flex items-center gap-5 p-3 border-b-2">
               <RiFlightLandFill className="text-lg" />
               <div>
-                <h3 className="text-md font-medium">44/2 U block</h3>
-                <p className="text-sm text-gray-400 font-medium">
+                <h3 className="text-md font-medium">
+                  {driverDetails?.destination}
+                </h3>
+                {/* <p className="text-sm text-gray-400 font-medium">
                   DLF Phase-3 , Gurugram
-                </p>
+                </p> */}
               </div>
             </div>
             <div className="flex items-center gap-5 p-3">
               <RiCashFill className="text-lg" />
               <div>
-                <h3 className="text-md font-medium">&#8377; 150.00</h3>
+                <h3 className="text-md font-medium">
+                  &#8377; {driverDetails?.fare}
+                </h3>
                 <p className="text-sm text-gray-400 font-medium">
                   Cash on delivery
                 </p>

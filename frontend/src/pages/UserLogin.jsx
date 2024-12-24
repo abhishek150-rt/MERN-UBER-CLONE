@@ -7,8 +7,8 @@ const UserLogin = () => {
   const { user, setUser } = useContext(UserDataContext);
  
   const [formValue, setFormValues] = useState({
-    email: "",
-    password: "",
+    email: "sandeep@gmail.com",
+    password: "Sandeep@123",
   });
 
   const handleSubmit = async (e) => {

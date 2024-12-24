@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { CaptainDataContext } from "../context/CaptainContext";
 
 const CaptainProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [isLoading, setIsLoading] = useState(false);
+  const { setCaptain } = useContext(CaptainDataContext);
 
   const checkAuthToken = async () => {
     setIsLoading(true);
@@ -20,7 +22,7 @@ const CaptainProtectedRoute = ({ children }) => {
       );
 
       if (response && response.data && response.data.status === "success") {
-        console.log(response.data.status, "response");
+        setCaptain(response?.data?.data);
       } else {
         navigate("/captainLogin");
       }

@@ -5,7 +5,7 @@ import { UserDataContext } from "../context/UserContext";
 const UserSignup = () => {
   const navigate = useNavigate();
   const { user, setUser } = useContext(UserDataContext);
-  console.log("user", setUser);
+
   const [formValue, setFormValues] = useState({
     firstName: "",
     lastName: "",

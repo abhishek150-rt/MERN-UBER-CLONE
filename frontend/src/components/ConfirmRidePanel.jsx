@@ -7,7 +7,15 @@ import {
 } from "@remixicon/react";
 import React from "react";
 
-const ConfirmRidePanel = ({ ridePanel, setRidePanel,setVehicleFound }) => {
+const ConfirmRidePanel = ({
+  ridePanel,
+  setRidePanel,
+  setVehicleFound,
+  ride,
+  initiatedRide,
+  pickup,
+  destination,
+}) => {
   return (
     <div>
       <h5
@@ -21,47 +29,43 @@ const ConfirmRidePanel = ({ ridePanel, setRidePanel,setVehicleFound }) => {
       <h3 className="text-2xl font-semibold mb-5">Confirm Your Ride</h3>
 
       <div className="flex gap-2 justify-between flex-col items-center">
-        <img
-          style={{ height: "10rem" }}
-          src={
-            "https://i.pinimg.com/474x/8d/21/7b/8d217b1000b642005fea7b6fd6c3d967.jpg"
-          }
-          alt=""
-        />
+        <img style={{ height: "10rem" }} src={ride?.image} alt="" />
         <div className="w-full mt-5">
           <div className="flex items-center gap-5 p-3 border-b-2">
             <RiMapPin4Fill className="text-lg" />
             <div>
-              <h3 className="text-md font-medium">NKC Projects Pvt Ltd</h3>
-              <p className="text-sm text-gray-400 font-medium">
+              <h3 className="text-md font-medium">{pickup}</h3>
+              {/* <p className="text-sm text-gray-400 font-medium">
                 Udhoy Vihar phase-5 , Gurugram
-              </p>
+              </p> */}
             </div>
           </div>
           <div className="flex items-center gap-5 p-3 border-b-2">
             <RiFlightLandFill className="text-lg" />
             <div>
-              <h3 className="text-md font-medium">44/2 U block</h3>
-              <p className="text-sm text-gray-400 font-medium">
+              <h3 className="text-md font-medium">{destination}</h3>
+              {/* <p className="text-sm text-gray-400 font-medium">
                 DLF Phase-3 , Gurugram
-              </p>
+              </p> */}
             </div>
           </div>
           <div className="flex items-center gap-5 p-3">
             <RiCashFill className="text-lg" />
             <div>
-              <h3 className="text-md font-medium">&#8377; 150.00</h3>
+              <h3 className="text-md font-medium">&#8377; {ride?.price}</h3>
               <p className="text-sm text-gray-400 font-medium">
                 Cash on delivery
               </p>
             </div>
           </div>
         </div>
-        <button className="w-full mt-5 bg-green-600 text-white font-semibold p-2 rounded-lg"
-        onClick={()=>{
+        <button
+          className="w-full mt-5 bg-green-600 text-white font-semibold p-2 rounded-lg"
+          onClick={() => {
             setVehicleFound(true);
-            setRidePanel(false)
-        }}
+            setRidePanel(false);
+            initiatedRide();
+          }}
         >
           Confirm
         </button>

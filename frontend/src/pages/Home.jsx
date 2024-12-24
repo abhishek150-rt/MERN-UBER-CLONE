@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect, useContext } from "react";
+import axios from "axios"; // Import axios
 import Logo from "../assets/logo2.png";
 import { useGSAP } from "@gsap/react";
 import { RiArrowDownWideFill } from "@remixicon/react";
@@ -8,8 +9,15 @@ import VehiclePanel from "../components/VehiclePanel";
 import ConfirmRidePanel from "../components/ConfirmRidePanel";
 import LookingForDriver from "../components/LookingForDriver";
 import WaitingForDriver from "../components/WaitingForDriver";
+import { UserDataContext } from "../context/UserContext";
+import { io } from "socket.io-client";
+import { useNavigate } from "react-router-dom";
+// import { useSocket } from "../context/SocketContext";
 
 const Home = () => {
+  const navigate = useNavigate();
+  const socketInstance = io("http://localhost:3001");
+  const { user } = useContext(UserDataContext);
   const panelRef = useRef(null);
   const vehiclePanelRef = useRef(null);
   const panelCloseRef = useRef(null);
@@ -19,16 +27,166 @@ const Home = () => {
 
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
-
+  const [pickupSuggestions, setPickupSuggestions] = useState([]);
+  const [destinationSuggestions, setDestinationSuggestions] = useState([]);
   const [panelOpen, setOpenPanel] = useState(false);
   const [vehiclePanel, setVehiclePanel] = useState(false);
   const [ridePanel, setRidePanel] = useState(false);
   const [vehicleFound, setVehicleFound] = useState(false);
   const [waitingForDriver, setWaitingForDriver] = useState(false);
+  const [fare, setFare] = useState(null);
+  const [ride, setRide] = useState(null);
+  const [driverDetails, setDriverDetails] = useState({
+    _id: "676ace21ce05c062f24f91b4",
+    user: "67643be9d366f1f99f5388a9",
+    pickup: "DLF Phase 3",
+    destination: "DLF Phase 5",
+    fare: 127.6,
+    status: "accepted",
+    __v: 0,
+    captain: {
+      fullName: {
+        firstName: "ABHISHEK",
+        lastName: "NEGI",
+      },
+      vehicle: {
+        color: "red",
+        vehicleType: "car",
+        plate: "UK071234",
+        capacity: 4,
+      },
+      location: {
+        lat: 28.4918026,
+        lng: 77.0954533,
+      },
+      _id: "67643bf8d366f1f99f5388ac",
+      email: "abhishek@gmail.com",
+      status: "inactive",
+      __v: 0,
+      socketId: "WhU_gj1J-2js3pp6AAFX",
+    },
+  });
+
+  socketInstance.on("ride-confirmed", (data) => {
+    if (data) {
+      setDriverDetails(data);
+      setVehicleFound(false);
+      setWaitingForDriver(true);
+      alert("Ride confirmmed by driver.");
+    }
+  });
+
+  socketInstance.on("ride-started", (data) => {
+    if (data)
+      navigate("/riding", {
+        state: data,
+        
+      });
+  });
+
+  useEffect(() => {
+    if (!user) return;
+
+    socketInstance.emit("join", {
+      userId: user?._id,
+      userType: "user",
+    });
+
+    return () => {
+      socketInstance.disconnect();
+    };
+  }, [user]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
   };
+
+  // Fetch suggestions for pickup and destination
+  const fetchLocationSuggestions = async (query, type) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:3001/api/map/get-locationSuggestion`,
+        {
+          params: { query },
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+      if (type === "pickup") {
+        setPickupSuggestions(response.data.data);
+      } else if (type === "destination") {
+        setDestinationSuggestions(response.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching location suggestions", error);
+    }
+  };
+
+  const getFare = async (destinationLoc) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/api/ride/get-fare",
+        { pickup, destination: destinationLoc },
+        {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+
+      if (response?.data?.fare) {
+        setFare(response?.data?.fare);
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  const initiatedRide = async () => {
+    const payload = {
+      userId: user?._id,
+      pickup: pickup,
+      destination: destination,
+      vehicleType: ride.vehicleType,
+    };
+
+    try {
+      const response = await axios.post(
+        "http://localhost:3001/api/ride/create",
+        payload,
+        {
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+      if (response?.data?.status === "success") {
+        alert(response?.data?.message);
+      } else {
+        alert(response?.data?.message);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // Call fetchLocationSuggestions on input change
+  useEffect(() => {
+    if (pickup) {
+      fetchLocationSuggestions(pickup, "pickup");
+    } else {
+      setPickupSuggestions([]);
+    }
+  }, [pickup]);
+
+  useEffect(() => {
+    if (destination) {
+      fetchLocationSuggestions(destination, "destination");
+    } else {
+      setDestinationSuggestions([]);
+    }
+  }, [destination]);
 
   useGSAP(
     function () {
@@ -50,8 +208,6 @@ const Home = () => {
     },
     [panelOpen]
   );
-
-  console.log("vehiclePanel", vehiclePanel);
 
   useGSAP(
     function () {
@@ -120,7 +276,7 @@ const Home = () => {
       <div className="h-screen w-screen">
         <img
           className="h-full object-cover w-full"
-          src="https://i0.wp.com/www.medianama.com/wp-content/uploads/2018/06/Screenshot_20180619-112715.png.png?fit=493%2C383&ssl=1"
+          src="https://blogadmin.uberinternal.com/wp-content/uploads/2017/10/ezgif.com-crop-1.gif"
           alt=""
         />
       </div>
@@ -156,9 +312,13 @@ const Home = () => {
         </div>
         <div className="p-3 bg-white" ref={panelRef}>
           <LocaltionPanel
-            vehiclePanel={vehiclePanel}
+            pickupSuggestions={pickupSuggestions}
+            destinationSuggestions={destinationSuggestions}
             setVehiclePanel={setVehiclePanel}
             setOpenPanel={setOpenPanel}
+            setPickup={setPickup}
+            setDestination={setDestination}
+            getFare={getFare}
           />
         </div>
       </div>
@@ -171,6 +331,8 @@ const Home = () => {
           vehiclePanel={vehiclePanel}
           setVehiclePanel={setVehiclePanel}
           setRidePanel={setRidePanel}
+          fare={fare}
+          setRide={setRide}
         />
       </div>
       <div
@@ -181,6 +343,10 @@ const Home = () => {
           ridePanel={ridePanel}
           setRidePanel={setRidePanel}
           setVehicleFound={setVehicleFound}
+          pickup={pickup}
+          destination={destination}
+          ride={ride}
+          initiatedRide={initiatedRide}
         />
       </div>
       <div
@@ -191,13 +357,19 @@ const Home = () => {
           ridePanel={ridePanel}
           setRidePanel={setRidePanel}
           setVehicleFound={setVehicleFound}
+          pickup={pickup}
+          destination={destination}
+          ride={ride}
         />
       </div>
       <div
         className="fixed z-100 bottom-6 bg-white px-3 py-6 w-full translate-y-full"
         ref={WaitingForDriverRef}
       >
-        <WaitingForDriver setWaitingForDriver={setWaitingForDriver} />
+        <WaitingForDriver
+          setWaitingForDriver={setWaitingForDriver}
+          driverDetails={driverDetails}
+        />
       </div>
     </div>
   );

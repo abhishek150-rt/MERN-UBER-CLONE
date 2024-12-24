@@ -47,7 +47,7 @@ const loginCaptain = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    console.log("hola amigo", email, password);
+    
     const captain = await captainModel.findOne({ email }).select("+password");
 
     if (!captain)

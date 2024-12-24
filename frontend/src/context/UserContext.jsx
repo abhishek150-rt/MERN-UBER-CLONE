@@ -7,6 +7,7 @@ const UserContext = ({ children }) => {
       lastName: "",
     },
     email: "",
+    id: "",
   });
 
   return (

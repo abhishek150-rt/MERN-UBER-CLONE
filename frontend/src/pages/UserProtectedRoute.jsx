@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { UserDataContext } from "../context/UserContext";
 
 const UserProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [isLoading, setIsLoading] = useState(false);
+  const { user, setUser } = useContext(UserDataContext);
 
   const checkAuthToken = async () => {
     setIsLoading(true);
@@ -20,7 +22,7 @@ const UserProtectedRoute = ({ children }) => {
       );
 
       if (response && response.data && response.data.status === "success") {
-        console.log(response.data.status, "response");
+        setUser(response.data.data);
       } else {
         navigate("/login");
       }

@@ -7,8 +7,8 @@ const CaptainLogin = () => {
   console.log("captain", captain);
 
   const [captainLoginData, setCaptainLoginData] = useState({
-    email: "",
-    password: "",
+    email: "abhishek@gmail.com",
+    password: "Abhishek@123",
   });
 
   const handleSubmit = async (e) => {

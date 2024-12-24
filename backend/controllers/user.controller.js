@@ -82,7 +82,6 @@ const getUserProfile = async (req, res) => {
 
 // Logout User
 const logoutUser = async (req, res) => {
-  console.log("reeeee",req)
   try {
     const token = req.cookies.token || req.headers.authorization.split(" ")[1];
 
